@@ -39,11 +39,3 @@ BC_R = @(t)rbc*t; % right BC global fcn ; u(1,t)=rbc
 % Crank-Nicolson / trapezoid
 figure;
 crank_matrix = crank_nicholson_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R, k); % contains a matrix of u(x,t) (spatial by time)
-
-% Runge-Kutta
-
-% Forward Euler (explicit)
-figure;
-forward_matrix = forward_difference_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R ,k); % contains a matrix of u(x,t) (spatial by time)
-
-
