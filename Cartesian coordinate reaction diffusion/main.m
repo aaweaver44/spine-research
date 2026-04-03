@@ -2,43 +2,33 @@ clear all; close all;
 
 %% __ Define global grid __ 
 %(r, dr, Nr, r_start, r_end)
+R_cell = 10;            % cell radius (um)
+R_domain = 30;          % domain radius (um)
+dr = 1;                 % spatial step size (um)
+r_start = dr;           % start at dr to avoid singularity at r=0
+r_end = R_domain;       % end pos (um)
+Nr = round(R/dr);       % number of spatial steps
+r = linspace(r_start, r_end, Nr+1);  % radial grid (um)
 
 %% __ Nutrient consumption in cell __ 
+% __ Initialize parameters __ 
+D_n = 1000;             % diffusion coeff (um^2/s)
+k_n = -1;               % reaction rate (1/s) (-) for consumption
+P_n = 0;                % source term (uM/s) - no external source
+dt_n = 0.0055;          % time step (s)
+t_start_n = 0;          % start time (s)
+t_end_n = 1;            % end time (s)
+Nt_n = round(t_end_n/dt_n);     % number of time steps
 
-% __ Initialize parameters __ %
-%(D, k, P, dt, t_end)
+% __ IC & BC __
+c0_n = 1;               % initial concentration (uM), uniform
+IC_n   = @(r) c0_n * ones(size(r));   % u(r,0) = c0, uniform initial concentration
+BC_L_n = @(t) c0_n * ones(size(t));   %PLACEHOLDER % u(r_start, t) = c0, nutrients held at cell surface
+BC_R_n = @(t) c0_n * ones(size(t));   % u(r_end, t)   = c0, far field assumed infinite source
 
-D = 1; % diffusion coefficient (cm^2/s)
-k = 1; % nutrients feeding the cell (1/s) where negative = consumption, positive = influx
-L = 1; % domain length (cm)
-dx = .1; % spatial step size (cm)
-dt = 0.0055; % time step size (sec) 
-t_end = 1; % sec; end simulation after this many seconds have elapsed
-
-x_start = 0; % start pos
-x_end = x_start+L; % end pos
-
-Nx = round(L/dx); % number of spatial steps
-x = linspace(x_start, x_end, Nx+1); % matrix of spatial grid
-
-t_start = 0;
-Nt = round(t_end/dt); % number of time steps 
-t_matrix = linspace(t_start, t_end, Nt+1); % matrix of time steps
-
-c_matrix = zeros(Nx, Nt); % Initialize concentration matrix
-% Initial Conditions
-c0 = 1; % initial concentration
-
-lbc = 0; % left boundary condition
-rbc = 0; % right boundary condition
-
-IC = @(x)sin(2*pi*x).^2; % initial condition global fcn ; u(x,0)=c0 (same size as inpout)
-BC_L = @(t)lbc*t; % left BC global fcn ; u(0,t)=lbc
-BC_R = @(t)rbc*t; % right BC global fcn ; u(1,t)=rbc
-
-% __ Call Numerical solver: Crank-Nicholson __ %
+% __ Call Numerical solver: Crank-Nicholson __ 
 figure;
-crank_matrix = crank_nicholson_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R, k); % contains a matrix of u(x,t) (spatial by time)
+C_n = crank_nicholson_spherical(r_start, r_end, t_start, t_end_n, Nr, Nt_n, D_n, IC_n, BC_L_n, BC_R_n, k_n, P_n, dr, r);
 
 %% __ Matrix production by cell __ 
 

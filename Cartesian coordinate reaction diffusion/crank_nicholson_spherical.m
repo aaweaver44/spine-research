@@ -59,28 +59,5 @@ for j=1:n
   w(:,j+1)=a\(b*w(:,j)+sigma*sides);
 end
 
-% Fill boundary conditions
+% return filled matrix with BCs attached
 w=[lside;w;rside];
-
-% Coordinate vectors for plotting
-x=xl+(0:M)*h;t=yb+(0:N)*d;
-
-% fprintf("crank w matrix")
-% w
-
-% 3D surface plot
-% mesh(x,t,w');
-surf(x,t,w')
-xlabel('x');ylabel('t');
-axis([xl xr yb yt -1 2])
-title('Crank Nicholson');
-
-% BC and IC functions
-% % function u=f(x)
-% % u=sin(2*pi*x).^2;
-% % 
-% % function u=l(t)
-% % u=0*t;
-% % 
-% % function u=r(t)
-% % u=0*t;
