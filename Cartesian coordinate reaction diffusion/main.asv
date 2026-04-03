@@ -1,13 +1,9 @@
 clear all; close all;
 
-%% __ Define global grid __ 
-%(r, dr, Nr, r_start, r_end)
+%%% __ Define global grid __ %%%
 
-%% __ Nutrient consumption in cell __ 
-
+%%% __ Nutrient consumption in cell __ %%%
 % __ Initialize parameters __ %
-%(D, k, P, dt, t_end)
-
 D = 1; % diffusion coefficient (cm^2/s)
 k = 1; % nutrients feeding the cell (1/s) where negative = consumption, positive = influx
 L = 1; % domain length (cm)
@@ -36,10 +32,8 @@ IC = @(x)sin(2*pi*x).^2; % initial condition global fcn ; u(x,0)=c0 (same size a
 BC_L = @(t)lbc*t; % left BC global fcn ; u(0,t)=lbc
 BC_R = @(t)rbc*t; % right BC global fcn ; u(1,t)=rbc
 
-% __ Call Numerical solver: Crank-Nicholson __ %
+% __ Numerical solution __ %
+
+% Crank-Nicolson / trapezoid
 figure;
 crank_matrix = crank_nicholson_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R, k); % contains a matrix of u(x,t) (spatial by time)
-
-%% __ Matrix production by cell __ 
-
-%% __ Plotting __

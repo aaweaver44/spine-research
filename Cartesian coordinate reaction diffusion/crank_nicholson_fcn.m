@@ -13,7 +13,7 @@ function w=crank_nicholson_textbook(xl,xr,yb,yt,M,N,D,IC,BC_L,BC_R,k)
 % M : number of spatial divisions
 % N : number of time divisions
 % c : diffusion coefficient
-% k : nutrients
+% k : reaction coefficient
 
 % Step sizes 
 h=(xr-xl)/M; % h
