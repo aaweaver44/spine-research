@@ -1,17 +1,11 @@
-%%%___Program 8.2 from textbook___%%%
-
-% Program 8.2 Crank-Nicolson method
-% input: space interval [xl,xr], time interval [yb,yt],
-%        number of space steps M, number of time steps N
-% output: solution w
-% Example usage: w=crank(0,1,0,1,10,10)
-
-function w=crank_nicholson_spherical(rl,rr,yb,yt,M,N,D,IC,BC_L,BC_R,k,P,dr,r_vec)
+function w=crank_nicholson_spherical(rl,rr,yb,yt,M,N,D,w0,BC_L,BC_R,k,P,dr,r_vec)
+% w0 : initial condition vector for this time step (length m)
 % rl, rr : spatial domain (radius, um)
 % yb, yt : time domain (s)
 % M : number of spatial divisions
 % N : number of time divisions 
 % D : diffusion coefficient (um^2/s)
+% w0 : 
 % k : reaction coefficient (1/s)
 % P : constant source term (uM/s)
 % dr : spatial step size (um)
@@ -22,8 +16,6 @@ d=(yt-yb)/N; % k
 % stability parameter 
 sigma=D*d/(dr*dr); % sigma = D*dt/dr^2
 rho = k*d;
-fprintf('crank sigma = %f\n', sigma);
-fprintf('crank rho = %f\n', rho);
 
 % number of interior points
 m=M-1; 
@@ -33,6 +25,10 @@ r_interior = r_vec(2:m+1);   % interior radial points, excluding boundaries
 % r-dependent off-diagonal coefficients
 sigma_minus = sigma * (1 - dr./r_interior);  % sigma_i^-
 sigma_plus  = sigma * (1 + dr./r_interior);  % sigma_i^+
+
+% Fix innermost point using L'Hopital symmetry condition
+sigma_minus(1) = 0;         % no left neighbor contribution
+sigma_plus(1)  = 2*sigma;   % doubled to account for symmetry
 
 % Implicit side (j terms, LHS)
 a = diag((2+2*sigma-rho)*ones(m,1)) ...
@@ -51,16 +47,16 @@ lside = lside(:)'; % ensure it is a row
 rside=BC_R(t_vec);
 rside = rside(:)'; % ensure it is a row
 
-w(:,1)=IC(r_interior)';
+w(:,1) = w0;            % initial condition passed in from main loop
 
 %%%___MATH TIME___%%%
 for j=1:n
   % Set Aside boundary Conditions
-  sides=[lside(j)+lside(j+1);
+  sides=[sigma_minus(1)*(lside(j)+lside(j+1));
   zeros(m-2,1);
-  rside(j)+rside(j+1)];
-  % Solution with 2*P*d term added to RHS at every time step)
-  w(:,j+1)=a\(b*w(:,j)+sigma*sides+2*P*d*ones(m,1));
+  sigma_plus(end)*(rside(j)+rside(j+1))];
+% Solution with 2*P*d term added to RHS at every time step
+  w(:,j+1)=a\(b*w(:,j)+sides+2*P*d*ones(m,1));
 end
 
 % return filled matrix with BCs attached
