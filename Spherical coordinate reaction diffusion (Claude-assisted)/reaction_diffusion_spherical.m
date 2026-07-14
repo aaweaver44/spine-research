@@ -1,16 +1,14 @@
 clear all; close all;
+%   Solves: dc/dt = D/r^2 * d/dr(r^2 * dc/dr) + k*c + rho
+%           = D * [d2c/dr2 + (2/r)*dc/dr] + k*c + rho
+%
+%   Terms:
+%      Domain: r = 0 (center of cell) to r = R (cell membrane)
+%      D * [...]  = diffusion (spatial spreading through the sphere)
+%      k * c      = reaction  (growth/decay proportional to current concentration)
+%      rho        = constant source (fixed production rate everywhere, independent of c)
 
-%%%__Initialize parameters, grid, & ICs for SPHERICAL diffusion__%%%
-%
-% Solves: dc/dt = D/r^2 * d/dr(r^2 * dc/dr) + k*c + rho
-%       = D * [d2c/dr2 + (2/r)*dc/dr] + k*c + rho
-%
-% Domain: r = 0 (center of cell) to r = R (cell membrane)
-%
-% TERMS:
-%   D * [...]  = diffusion (spatial spreading through the sphere)
-%   k * c      = reaction  (growth/decay proportional to current concentration)
-%   rho        = constant source (fixed production rate everywhere, independent of c)
+%%%__Initialize parameters, grid, & ICs for spherical diffusion__%%%
 
 D = 1;         % diffusion coefficient (cm^2/s)
 k = 1;         % reaction rate (1/s), positive = growth
@@ -72,10 +70,10 @@ grid on;
 hold off;
 
 %%%==========================================================%%%
-%%%      CIRCULAR CELL VISUALIZATION (Animated)               %%%
+%%%      CIRCULAR CELL VISUALIZATION ANIMATION               %%%
 %%%==========================================================%%%
 
-% Choose which solution to animate
+% Select solution to animate
 sol = crank_matrix;   
 method_name = 'Crank-Nicolson';
 
@@ -86,7 +84,7 @@ theta = linspace(0, 2*pi, N_theta);
 X = R_mesh .* cos(Theta_mesh);
 Y = R_mesh .* sin(Theta_mesh);
 
-% Consistent color limits
+% Color limits
 c_min = min(sol(:));
 c_max = max(sol(:));
 if c_min == c_max
@@ -147,7 +145,7 @@ xlabel('x (cm)', 'FontSize', 13);
 ylabel('y (cm)', 'FontSize', 13);
 h_title = title(sprintf('%s  |  \\rho = %.2f  |  t = 0.000 s', method_name, rho), 'FontSize', 14);
 
-% Animate
+% Animation
 frames_to_show = 200;
 step = max(1, floor(size(sol, 2) / frames_to_show));
 
