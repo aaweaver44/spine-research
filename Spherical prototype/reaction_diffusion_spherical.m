@@ -8,7 +8,7 @@ clear all; close all;
 %      k * c      = reaction  (growth/decay proportional to current concentration)
 %      rho        = constant source (fixed production rate everywhere, independent of c)
 
-%%%__Initialize parameters, grid, & ICs for spherical diffusion__%%%
+%% %__Initialize parameters, grid, & ICs for spherical diffusion__%%%
 
 D = 1;         % diffusion coefficient (cm^2/s)
 k = 1;         % reaction rate (1/s), positive = growth
@@ -44,18 +44,18 @@ IC = @(r) sin(2*pi*r/R).^2;
 % Boundary at r = R (membrane): constant value
 BC_R = @(t) rbc * ones(size(t));
 
-%%%__Numerical Solutions__%%%
+%% %__Numerical Solutions__%%%
 
 % Crank-Nicolson (implicit, spherical)
 figure;
 crank_matrix = crank_nicholson_spherical(r_start, r_end, t_start, t_end, ...
                                           Nr, Nt, D, IC, BC_R, k, rho);
 
+%% %__Forward Euler Comparison__%%%
 % Forward Euler (explicit, spherical)
 figure;
 forward_matrix = forward_difference_spherical(r_start, r_end, t_start, t_end, ...
-                                               Nr, Nt, D, IC, BC_R, k, rho);
-
+                                              Nr, Nt, D, IC, BC_R, k, rho);
 %%%__Compare the two methods at final time (line plot)__%%%
 figure;
 r_full = linspace(r_start, r_end, Nr+1);
@@ -69,8 +69,8 @@ legend('Location', 'best');
 grid on;
 hold off;
 
-%%%==========================================================%%%
-%%%      CIRCULAR CELL VISUALIZATION ANIMATION               %%%
+%% %==========================================================%%%
+%%%                     Visualization                        %%%
 %%%==========================================================%%%
 
 % Select solution to animate
