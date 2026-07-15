@@ -12,7 +12,7 @@
 %         BC_R_func = boundary condition at r=R, k = reaction rate
 % output: solution w
 
-function w = crank_nicholson_spherical(rl, rr, tb, te, M, N, D, IC, BC_R_func, k)
+function w = crank_nicholson_spherical_nsc(rl, rr, tb, te, M, N, D, IC, BC_R_func, k)
 
 dr = (rr - rl) / M;       % spatial step
 dt = (te - tb) / N;       % time step

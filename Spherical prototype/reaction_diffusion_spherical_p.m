@@ -48,13 +48,13 @@ BC_R = @(t) rbc * ones(size(t));
 
 % Crank-Nicolson (implicit, spherical)
 figure;
-crank_matrix = crank_nicholson_spherical(r_start, r_end, t_start, t_end, ...
+crank_matrix = crank_nicholson_spherical_p(r_start, r_end, t_start, t_end, ...
                                           Nr, Nt, D, IC, BC_R, k, rho);
 
 %% %__Forward Euler Comparison__%%%
 % Forward Euler (explicit, spherical)
 figure;
-forward_matrix = forward_difference_spherical(r_start, r_end, t_start, t_end, ...
+forward_matrix = forward_difference_spherical_p(r_start, r_end, t_start, t_end, ...
                                               Nr, Nt, D, IC, BC_R, k, rho);
 %%%__Compare the two methods at final time (line plot)__%%%
 figure;

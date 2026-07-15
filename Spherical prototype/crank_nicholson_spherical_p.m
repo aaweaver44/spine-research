@@ -11,7 +11,7 @@
 %         rho = constant source term
 % output: solution w
 
-function w = crank_nicholson_spherical(rl, rr, tb, te, M, N, D, IC, BC_R_func, k, rho)
+function w = crank_nicholson_spherical_p(rl, rr, tb, te, M, N, D, IC, BC_R_func, k, rho)
 
 dr = (rr - rl) / M;       % spatial step
 dt = (te - tb) / N;       % time step
