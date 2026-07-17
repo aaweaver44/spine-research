@@ -6,7 +6,7 @@
 % output: solution w
 % Example usage: w=crank(0,1,0,1,10,10)
 
-function w=crank_nicholson_textbook(xl,xr,yb,yt,M,N,D,IC,BC_L,BC_R, nut)
+function w=crank_nicholson_textbook(xl,xr,yb,yt,M,N,D,IC,BC_L,BC_R, k_n)
 % in main file, passing it: x_start, x_end, t_start, t_end, Nx, Nt, IC, BC_L, BC_R
 % xl, xr : spatial domain [xl,xr]
 % yb, yt : time domain [yb,yt]
@@ -15,13 +15,13 @@ function w=crank_nicholson_textbook(xl,xr,yb,yt,M,N,D,IC,BC_L,BC_R, nut)
 % c : diffusion coefficient
 
 % Step sizes 
-h=(xr-xl)/M; % dx
-k=(yt-yb)/N; % dt
+dx=(xr-xl)/M; % dx
+dt=(yt-yb)/N; % dt
 
 % stability parameter - model is best when sigma is around 1
 % Also what we are using for the finite difference analysis
-sigma=D*k/(h*h); 
-rho = nut*k;
+sigma=D*dt/(dx*dx); 
+rho = k_n*dt;
 fprintf('crank sigma = %f\n', sigma);
 
 % number of interior points
@@ -40,8 +40,8 @@ b=b+diag(sigma*ones(m-1,1),-1);        % define tridiagonal matrix b
 % % lside=l(yb+(0:n)*k); 
 % % rside=r(yb+(0:n)*k);
 % % w(:,1)=f(xl+(1:m)*h)';                 % initial conditions
-t_vec = yb+(0:n)*k;
-x_interior = xl+(1:m)*h;
+t_vec = yb+(0:n)*dt;
+x_interior = xl+(1:m)*dx;
 lside=BC_L(t_vec); 
 lside = lside(:)'; % ensure it is a row
 rside=BC_R(t_vec);
@@ -62,13 +62,24 @@ end
 w=[lside;w;rside];
 
 % Coordinate vectors for plotting
-x=xl+(0:M)*h;t=yb+(0:N)*k;
+x=xl+(0:M)*dx;
+t=yb+(0:N)*dt;
 
 % 3D surface plot
 % mesh(x,t,w');
-surf(x,t,w')
-xlabel('x');ylabel('t');
-axis([xl xr yb yt -1 2])
+surf(x, t, w');
+shading interp;
+xlabel('x  (cm)');
+ylabel('t  (s)');
+zlabel('c(x,t)');
+title({'Crank-Nicolson  |  1D Cartesian diffusion', ...
+       sprintf('D = %.3g cm^2/s,  \\Deltax = %.3g cm,  \\Deltat = %.4g s,  \\sigma = %.3g  (unconditionally stable)', ...
+               D, dx, dt, sigma), ...
+       sprintf('max|c| = %.3g', max(abs(w(:))))});
+cb = colorbar;  cb.Label.String = 'c(x,t)';
+view(60, 30);  grid on;
+axis([xl xr yb yt min(-0.1, min(w(:))) max(1.1, max(w(:)))]);
+%axis([xl xr yb yt -1 2])
 
 % BC and IC functions
 % % function u=f(x)

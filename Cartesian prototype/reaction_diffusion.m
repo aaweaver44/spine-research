@@ -1,7 +1,7 @@
 clear all; close all;
     %%%__Initialize parameters, grid, & ICs__%%%
 D = 1; % diffusion coefficient (cm^2/s)
-k = 1; % nutrients feeding the cell (1/s) where negative = consumption, positive = influx
+k_n = 1; % nutrients feeding the cell (1/s) where negative = consumption, positive = influx
 L = 1; % domain length (cm)
 
 x_start = 0; % start pos
@@ -13,9 +13,12 @@ x = linspace(x_start, x_end, Nx+1); % matrix of spatial grid
 
 t_start = 0;
 t_end = 1; % sec; end simulation after this many seconds have elapsed
-dt = 0.0055; % time step size (sec)
-Nt = round(t_end/dt); % number of time steps 
+dt_req = 0.004; % requested time step size (sec) 
+Nt = round(t_end/dt_req); % number of time steps 
+dt = t_end/Nt;  % actual time step size
 t_matrix = linspace(t_start, t_end, Nt+1); % matrix of time steps
+fprintf('dt: requested %.6f -> effective %.6f  (Nt = %d),  sigma = %.4f\n', ...
+        dt_req, dt, Nt, D*dt/dx^2);
 
 c_matrix = zeros(Nx, Nt); % Initialize concentration matrix
 % Initial Conditions
@@ -32,12 +35,12 @@ BC_R = @(t)rbc*t; % right BC global fcn ; u(1,t)=rbc
 
 % Crank-Nicolson / trapezoid
 figure;
-crank_matrix = crank_nicholson_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R, k); % contains a matrix of u(x,t) (spatial by time)
+crank_matrix = crank_nicholson_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R, k_n); % contains a matrix of u(x,t) (spatial by time)
 
 % Runge-Kutta
 
 % Forward Euler (explicit)
 figure;
-forward_matrix = forward_difference_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R ,k); % contains a matrix of u(x,t) (spatial by time)
+forward_matrix = forward_difference_textbook(x_start, x_end, t_start, t_end, Nx, Nt, D, IC, BC_L, BC_R ,k_n); % contains a matrix of u(x,t) (spatial by time)
 
 
