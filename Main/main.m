@@ -7,7 +7,7 @@ R_domain = 70;          % domain radius (um)
 dr = 2;                 % spatial step size (um)
 
 % __ Cell Domain: r_start to R_cell __
-r_start = dr;           % start at dr to avoid singularity at r=0
+r_start = 0;  
 Nr_cell = round(R_cell/dr);       % number of spatial steps in cell
 r_cell_grid = linspace(r_start, R_cell, Nr_cell+1);  % cell radial grid (um)
 
@@ -99,25 +99,30 @@ fprintf('sigma cell = %f\n', sigma_n_cell);
 fprintf('sigma ECM  = %f\n', sigma_n_ecm);
 fprintf('rho cell   = %f\n', rho_n_cell);
 
-% __ Nutrient Plot __
+% __ Nutrient Plots __
 t_vec_plot = linspace(t_start_n, t_end_n, Nt_n+1);
+cmin = 0;  cmax = c0_n;        % uM range for graph scaling
 
 figure(1);
 surf(r_cell_grid, t_vec_plot, C_n_cell')
-shading interp
-xlabel('r (um)'); ylabel('t (s)'); zlabel('C (uM)');
-title('Nutrient Concentration');
+shading interp;  caxis([cmin cmax]);   % graphs share a scale
+xlabel('r (\mum)'); ylabel('t (s)'); zlabel('C (\muM)');
+title('Nutrient Concentration - Cell Region');
+view(45, 25); 
+colorbar;
 hold on;
 xline(R_cell, 'r-', 'LineWidth', 2, 'Label', 'cell boundary')
 hold off;
 
 figure(2);
 surf(r_ecm_grid, t_vec_plot, C_n_ecm')
-shading interp
-xlabel('r (um)'); ylabel('t (s)'); zlabel('C (uM)');
+shading interp;  caxis([cmin cmax]);   % graphs share a scale
+xlabel('r (\mum)'); ylabel('t (s)'); zlabel('C (\muM)');
 title('Nutrient Concentration - ECM Region');
+view(45, 25);
+colorbar;
 hold on;
-xline(R_cell, 'r-', 'LineWidth', 2, 'Label', 'cell boundary')
+xline(R_cell, 'r-', 'LineWidth', 2, 'Label', 'cell boundary') 
 hold off;
 
 %% __ Circular heatmap __

@@ -153,10 +153,10 @@ frames_to_show = 200;
 step = max(1, floor(size(sol, 2) / frames_to_show));
 
 for j = 1:step:size(sol, 2)
-     if ~isvalid(h_pcolor)      % window was closed - stop cleanly
+     if ~isvalid(h_pcolor)      % window was closed - stop
         break
      end
-     
+
     t_now = (j-1) * dt;
     c_now = sol(:, j)';
     C_mesh = repmat(c_now, N_theta, 1);
