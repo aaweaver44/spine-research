@@ -18,7 +18,7 @@ dr = (rr - rl) / M;       % spatial step
 dt = (te - tb) / N;       % time step
 
 sigma = D * dt / (dr^2);  % base stability parameter
-rho = k * dt;             % reaction parameter
+k_dt = k * dt;             % reaction parameter
 fprintf('forward sigma = %f\n', sigma);
 
 m = M - 1;   % number of interior points (excludes r=0 and r=R)
@@ -36,7 +36,7 @@ r_interior = (1:m)' * dr;
 % Collecting coefficients of c(i-1), c(i), c(i+1):
 %
 %   c(i-1) coefficient: sigma * (1 - 1/i)      where i = r_index = r(i)/dr
-%   c(i)   coefficient: 1 - 2*sigma + rho
+%   c(i)   coefficient: 1 - 2*sigma + k_dt
 %   c(i+1) coefficient: sigma * (1 + 1/i)
 %
 % Note: i here is the grid index, and r(i) = i*dr, so 2/(r(i)) * dr/2 = 1/i
@@ -46,7 +46,7 @@ idx = (1:m)';
 
 % Coefficients for each interior point
 coeff_lower = sigma * (1 - 1./idx);    % c(i-1) coefficient
-coeff_diag  = (1 - 2*sigma + rho);     % c(i) coefficient (same for all)
+coeff_diag  = (1 - 2*sigma + k_dt);     % c(i) coefficient (same for all)
 coeff_upper = sigma * (1 + 1./idx);    % c(i+1) coefficient
 
 % Build the tridiagonal matrix
@@ -120,7 +120,9 @@ xlabel('r (radius)'); ylabel('t (time)');
 zlabel('Concentration c(r,t)');
 axis([rl rr tb te -1 2]);
 view(60, 30);
-title('Forward Difference - Spherical Coordinates');
-colorbar;
-
+title({sprintf('spherical reaction-diffusion, Forward Difference No Space Constant'), ...
+       sprintf('D=%.2g,  k=%.2g,  \\sigma=%.3g', D, k, sigma)});
+cb=colorbar; cb.Label.String='c(r,t)';
+view(50, 30);  grid on;
+zlim([min(0,min(w(:))) max(w(:))*1.05]);   % data-set, not fixed 
 end

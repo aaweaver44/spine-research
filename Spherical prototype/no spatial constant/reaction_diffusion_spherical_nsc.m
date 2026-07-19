@@ -99,7 +99,10 @@ sgtitle(['Cell Cross-Section Over Time (', method_name, ')'], ...
         'FontSize', 16, 'FontWeight', 'bold');
 
 num_snapshots = 6;
-snapshot_indices = round(linspace(1, size(sol, 2), num_snapshots));
+% Linear spacing
+% snapshot_indices = round(linspace(1, size(sol, 2), num_snapshots));
+% Logarithmic spacing
+snapshot_indices = unique(round(logspace(0, log10(size(sol,2)), num_snapshots)));
 
 for s = 1:num_snapshots
     j = snapshot_indices(s);
@@ -156,8 +159,10 @@ frames_to_show = 200;                                    % total animation frame
 step = max(1, floor(size(sol, 2) / frames_to_show));     % skip frames for speed
 
 for j = 1:step:size(sol, 2)
+    if ~isvalid(h_pcolor)      % window was closed - stop cleanly
+        break
+    end
     t_now = (j-1) * dt;
-    
     c_now = sol(:, j)';
     C_mesh = repmat(c_now, N_theta, 1);
     

@@ -18,7 +18,7 @@ dr = (rr - rl) / M;       % spatial step
 dt = (te - tb) / N;       % time step
 
 sigma = D * dt / (dr^2);  % base stability parameter
-rho = k * dt;             % reaction parameter
+k_dt = k * dt;             % reaction parameter
 fprintf('crank sigma = %f\n', sigma);
 
 m = M - 1;   % number of interior points
@@ -41,12 +41,12 @@ idx = (1:m)';
 %
 % IMPLICIT side (time j+1):  [2I - dt*L] * w^(j+1) = ...
 %   c(i-1): -sigma * (1 - 1/i)
-%   c(i):    2 + 2*sigma - rho
+%   c(i):    2 + 2*sigma - k_dt
 %   c(i+1): -sigma * (1 + 1/i)
 %
 % EXPLICIT side (time j):    ... = [2I + dt*L] * w^(j) + BC terms
 %   c(i-1):  sigma * (1 - 1/i)
-%   c(i):    2 - 2*sigma + rho
+%   c(i):    2 - 2*sigma + k_dt
 %   c(i+1):  sigma * (1 + 1/i)
 
 % Coefficients that vary with r
@@ -54,12 +54,12 @@ lower_coeff = sigma * (1 - 1./idx);   % sub-diagonal
 upper_coeff = sigma * (1 + 1./idx);   % super-diagonal
 
 %% ---- Implicit matrix A (left-hand side) ----
-A = diag((2 + 2*sigma - rho) * ones(m,1));           % main diagonal
+A = diag((2 + 2*sigma - k_dt) * ones(m,1));           % main diagonal
 A = A + diag(-upper_coeff(1:m-1), 1);                 % upper diagonal
 A = A + diag(-lower_coeff(2:m), -1);                  % lower diagonal
 
 %% ---- Explicit matrix B (right-hand side) ----
-B = diag((2 - 2*sigma + rho) * ones(m,1));            % main diagonal
+B = diag((2 - 2*sigma + k_dt) * ones(m,1));            % main diagonal
 B = B + diag(upper_coeff(1:m-1), 1);                  % upper diagonal
 B = B + diag(lower_coeff(2:m), -1);                   % lower diagonal
 
@@ -135,7 +135,11 @@ surf(r_full, t, w');
 xlabel('r (radius)'); ylabel('t (time)');
 zlabel('Concentration c(r,t)');
 axis([rl rr tb te -1 2]);
-title('Crank-Nicolson - Spherical Coordinates');
-colorbar;
+view(60, 30);
+title({sprintf('spherical reaction-diffusion, Forward Difference, No Space Constant'), ...
+       sprintf('D=%.2g, k=%.2g, \\sigma=%.3g', D, k, sigma)});
+cb=colorbar; cb.Label.String='c(r,t)';
+view(50, 30);  grid on;
+zlim([min(0,min(w(:))) max(w(:))*1.05]);   % data-set, not fixed 
 
 end
