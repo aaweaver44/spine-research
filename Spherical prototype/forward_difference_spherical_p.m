@@ -17,7 +17,7 @@ dr = (rr - rl) / M;       % spatial step
 dt = (te - tb) / N;       % time step
 
 sigma = D * dt / (dr^2);  % base stability parameter
-rho_k = k * dt;           % reaction parameter (renamed to avoid conflict with rho)
+k_dt = k * dt;           % reaction parameter (renamed to avoid conflict with rho)
 rho_dt = rho * dt;         % source term scaled by time step
 fprintf('forward sigma = %f\n', sigma);
 
@@ -29,7 +29,7 @@ idx = (1:m)';
 
 % Tridiagonal coefficients from spherical Laplacian
 coeff_lower = sigma * (1 - 1./idx);    % c(i-1) coefficient
-coeff_diag  = (1 - 2*sigma + rho_k);   % c(i) coefficient
+coeff_diag  = (1 - 2*sigma + k_dt);   % c(i) coefficient
 coeff_upper = sigma * (1 + 1./idx);    % c(i+1) coefficient
 
 % Build the tridiagonal matrix
@@ -84,9 +84,14 @@ t = (0:N) * dt;
 
 %% ==================== PLOT ====================
 surf(r_full, t, w');
-xlabel('r (radius)'); ylabel('t (time)');
-zlabel('Concentration c(r,t)');
-title(sprintf('Forward Difference - Spherical  (\\rho = %.2f)', rho));
-colorbar;
-
+h = surf(r_full, t, w');
+h.FaceColor = 'interp';    % smooth color gradient
+h.EdgeColor = 'k';         % but keep the black grid lines
+h.EdgeAlpha = 0.3;         % faint grid lines
+xlabel('r (radius)'); ylabel('t (time,s)'); zlabel('Concentration c(r,t)');
+title({'spherical reaction-diffusion, Forward Difference (with source)', ...
+       sprintf('D=%.2g,  k=%.2g,  rho=%.2g,  \\sigma=%.3g', D, k, rho, sigma)});
+cb=colorbar; cb.Label.String='c(r,t)';
+view(50, 30);  grid on;
+zlim([min(0,min(w(:))) max(w(:))*1.05]);
 end

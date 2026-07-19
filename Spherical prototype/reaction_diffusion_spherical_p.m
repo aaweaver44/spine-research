@@ -28,8 +28,8 @@ r_start = 0;             % center of cell
 r_end   = r_start + R;   % membrane
 
 Nr = round(R / dr);                          % number of spatial steps
-r = linspace(r_start, r_end, Nr+1);          % spatial grid
 
+r = linspace(r_start, r_end, Nr+1);          % spatial grid
 t_start = 0;
 Nt = round(t_end / dt);                      % number of time steps
 t_matrix = linspace(t_start, t_end, Nt+1);   % time grid
@@ -97,7 +97,10 @@ sgtitle(sprintf('Cell Cross-Section Over Time  (%s,  \\rho = %.2f)', method_name
         'FontSize', 16, 'FontWeight', 'bold');
 
 num_snapshots = 6;
-snapshot_indices = round(linspace(1, size(sol, 2), num_snapshots));
+% linear spacing
+% snapshot_indices = round(linspace(1, size(sol, 2), num_snapshots));
+% logarithmic spacing
+snapshot_indices = unique(round(logspace(0, log10(size(sol,2)), num_snapshots)));
 
 for s = 1:num_snapshots
     j = snapshot_indices(s);
@@ -150,8 +153,11 @@ frames_to_show = 200;
 step = max(1, floor(size(sol, 2) / frames_to_show));
 
 for j = 1:step:size(sol, 2)
+     if ~isvalid(h_pcolor)      % window was closed - stop cleanly
+        break
+     end
+     
     t_now = (j-1) * dt;
-    
     c_now = sol(:, j)';
     C_mesh = repmat(c_now, N_theta, 1);
     

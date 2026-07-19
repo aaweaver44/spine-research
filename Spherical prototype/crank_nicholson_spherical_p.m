@@ -17,7 +17,7 @@ dr = (rr - rl) / M;       % spatial step
 dt = (te - tb) / N;       % time step
 
 sigma = D * dt / (dr^2);  % base stability parameter
-rho_k = k * dt;           % reaction parameter (renamed to avoid conflict with rho)
+k_dt = k * dt;           % reaction parameter (renamed to avoid conflict with rho)
 rho_dt = rho * dt;         % source term scaled by time step
 fprintf('crank sigma = %f\n', sigma);
 
@@ -32,12 +32,12 @@ lower_coeff = sigma * (1 - 1./idx);
 upper_coeff = sigma * (1 + 1./idx);
 
 %% ---- Implicit matrix A (left-hand side) ----
-A = diag((2 + 2*sigma - rho_k) * ones(m,1));
+A = diag((2 + 2*sigma - k_dt) * ones(m,1));
 A = A + diag(-upper_coeff(1:m-1), 1);
 A = A + diag(-lower_coeff(2:m), -1);
 
 %% ---- Explicit matrix B (right-hand side) ----
-B = diag((2 - 2*sigma + rho_k) * ones(m,1));
+B = diag((2 - 2*sigma + k_dt) * ones(m,1));
 B = B + diag(upper_coeff(1:m-1), 1);
 B = B + diag(lower_coeff(2:m), -1);
 
@@ -94,9 +94,15 @@ t = (0:N) * dt;
 
 %% ==================== PLOT ====================
 surf(r_full, t, w');
-xlabel('r (radius)'); ylabel('t (time)');
-zlabel('Concentration c(r,t)');
-title(sprintf('Crank-Nicolson - Spherical  (\\rho = %.2f)', rho));
-colorbar;
+h = surf(r_full, t, w');
+h.FaceColor = 'interp';    % smooth color gradient
+h.EdgeColor = 'k';         % but keep the black grid lines
+h.EdgeAlpha = 0.3;         % faint grid lines
+xlabel('r (radius)'); ylabel('t (time,s)'); zlabel('Concentration c(r,t)');
+title({'spherical reaction-diffusion, Crank Nicholson (with source)', ...
+       sprintf('D=%.2g,  k=%.2g,  rho=%.2g,  \\sigma=%.3g', D, k, rho, sigma)});
+cb=colorbar; cb.Label.String='c(r,t)';
+view(50, 30);  grid on;
+zlim([min(0,min(w(:))) max(w(:))*1.05]);
 
 end
