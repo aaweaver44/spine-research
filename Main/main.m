@@ -1,5 +1,20 @@
 clear all; close all;
-
+%% main.m — Two-region nutrient reaction-diffusion (cell + ECM), spherical
+%
+%   Solves nutrient transport across a cell embedded in ECM, as two coupled
+%   1D radial regions sharing a Fick's-law flux interface at r = R_cell:
+%
+%       Cell:  r = 0 .. R_cell     consumes nutrient (k < 0), center at r = 0
+%       ECM:   R_cell .. R_domain  inert medium (k = 0), far field fixed supply
+%
+%   Structure:
+%     - grid & parameters       (per region: D, k, P)
+%     - initial / boundary conditions
+%     - time loop: interface -> cell solve -> ECM solve
+%     - plots: cell surface, ECM surface, circular cross-section
+%
+%   Calls:  interface_cell_ecm.m,  crank_nicholson_spherical.m
+%
 %% __ Define Domains __ 
 % __ Global __
 R_cell = 20;            % cell radius (um)
@@ -59,12 +74,7 @@ C_n_ecm(:,1)  = IC_n_ecm(r_ecm_grid)';      % attach ICs
 for j = 1:Nt_n
     
     % Fick's law continuous flux condition at R_cell
-    % Uses interior points adjacent to interface, not boundary values
-    C_cell_interior_end = C_n_cell(end-1, j);  % last interior point of cell
-    C_ecm_interior_start = C_n_ecm(2, j);      % first interior point of ECM
-    
-    C_interface = (D_n_cell * C_cell_interior_end + D_n_ecm * C_ecm_interior_start) ...
-                  / (D_n_cell + D_n_ecm);
+    C_interface = interface_cell_ecm(C_n_cell(end-1,j), C_n_ecm(2,j), D_n_cell, D_n_ecm);
 
     % Update BCs
     BC_R_n_cell = @(t) C_interface * ones(size(t));   % cell surface

@@ -1,17 +1,25 @@
 function w=crank_nicholson_spherical(rl,rr,yb,yt,M,N,D,w0,BC_L,BC_R,k,P,dr,r_vec,inner_bc_select)
-% w0 : initial condition vector for this time step (length m)
-% rl, rr : spatial domain (radius, um)
-% yb, yt : time domain (s)
-% M : number of spatial divisions
-% N : number of time divisions 
-% D : diffusion coefficient (um^2/s)
-% w0 : 
-% k : reaction coefficient (1/s)
-% P : constant source term (uM/s)
-% dr : spatial step size (um)
-% r_vec : radial grid vector (um)
-% inner_bc_select : choose how the function handles the inner boundary condition
-
+%% Crank-Nicolson step for 1D spherical reaction-diffusion in one region.
+%
+%   Advances  dc/dt = D[d2c/dr2 + (2/r)dc/dr] + k*c + P  by N steps, using
+%   Driven one step at a time by main.m so the interface can be
+%   injected between steps.
+%
+%   Inputs:
+%     rl, rr          : spatial domain (radius, um)
+%     yb, yt          : time domain (s)
+%     M, N            : number of spatial, time divisions
+%     D               : diffusion coefficient   (um^2/s)
+%     w0              : initial interior concentration values for this step (length M-1)
+%     BC_L, BC_R      : boundary-value functions of t at rl and rr
+%     k               : reaction rate           (1/s;  < 0 = consumption)
+%     P               : constant source term     (uM/s)
+%     dr              : spatial step size        (um)
+%     r_vec           : radial grid vector       (um)
+%     inner_bc_select : choose how the function handles the inner boundary condition
+%                       'symmetry'  = r = 0 center (L'Hopital, BC_L unused)
+%                       'dirichlet' = real inner boundary (BC_L applied)
+%%
 % Step size
 d=(yt-yb)/N; % k
 % stability parameter 
