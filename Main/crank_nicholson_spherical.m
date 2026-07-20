@@ -1,4 +1,4 @@
-function w=crank_nicholson_spherical(rl,rr,yb,yt,M,N,D,w0,BC_L,BC_R,k,P,dr,r_vec)
+function w=crank_nicholson_spherical(rl,rr,yb,yt,M,N,D,w0,BC_L,BC_R,k,P,dr,r_vec,inner_bc_select)
 % w0 : initial condition vector for this time step (length m)
 % rl, rr : spatial domain (radius, um)
 % yb, yt : time domain (s)
@@ -10,6 +10,7 @@ function w=crank_nicholson_spherical(rl,rr,yb,yt,M,N,D,w0,BC_L,BC_R,k,P,dr,r_vec
 % P : constant source term (uM/s)
 % dr : spatial step size (um)
 % r_vec : radial grid vector (um)
+% inner_bc_select : choose how the function handles the inner boundary condition
 
 % Step size
 d=(yt-yb)/N; % k
@@ -26,9 +27,14 @@ r_interior = r_vec(2:m+1);   % interior radial points, excluding boundaries
 sigma_minus = sigma * (1 - dr./r_interior);  % sigma_i^-
 sigma_plus  = sigma * (1 + dr./r_interior);  % sigma_i^+
 
-% Fix innermost point using L'Hopital symmetry condition
-sigma_minus(1) = 0;         % no left neighbor contribution
-sigma_plus(1)  = 2*sigma;   % doubled to account for symmetry
+% Handle inner bc calculation per selection
+if strcmp(inner_bc_select, 'symmetry')       % r = 0 center: L'Hopital symmetry, no left neighbor
+    sigma_minus(1) = 0;
+    sigma_plus(1)  = 2*sigma;
+elseif strcmp(inner_bc_select, 'dirichlet')  % interface: keep r-dependent coeffs so BC_L applies
+else
+    error('inner_bc_select must be ''symmetry'' or ''dirichlet''');
+end
 
 % Implicit side (j terms, LHS)
 a = diag((2+2*sigma-rho)*ones(m,1)) ...

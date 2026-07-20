@@ -71,19 +71,24 @@ for j = 1:Nt_n
     BC_L_n_ecm  = @(t) C_interface * ones(size(t));   % ECM inner edge
     BC_L_n_cell = @(t) C_n_cell(2,j) * ones(size(t)); % Zero-flux Neumann BC at cell center (symmetry condition)
 
-    % Solve each region for this time step
+    % Solve Cell region for this time step
     w_temp = crank_nicholson_spherical(r_start, R_cell, ...
         t_start_n+(j-1)*dt_n, t_start_n+j*dt_n, ...
-        Nr_cell, 1, D_n_cell, C_n_cell(2:end-1,j), BC_L_n_cell, BC_R_n_cell, k_n_cell, P_n_cell, dr, r_cell_grid);
+        Nr_cell, 1, D_n_cell, C_n_cell(2:end-1,j), BC_L_n_cell, ...
+        BC_R_n_cell, k_n_cell, P_n_cell, dr, r_cell_grid, ...
+        'symmetry');
     C_n_cell(:,j+1) = w_temp(:,end);
 
+    % Solve ECM region for this time step
     w_temp = crank_nicholson_spherical(R_cell, R_domain, ...
         t_start_n+(j-1)*dt_n, t_start_n+j*dt_n, ...
-        Nr_ecm, 1, D_n_ecm, C_n_ecm(2:end-1,j), BC_L_n_ecm, BC_R_n_ecm, k_n_ecm, P_n_ecm, dr, r_ecm_grid);
+        Nr_ecm, 1, D_n_ecm, C_n_ecm(2:end-1,j), BC_L_n_ecm, ...
+        BC_R_n_ecm, k_n_ecm, P_n_ecm, dr, r_ecm_grid, ...
+        'dirichlet');
     C_n_ecm(:,j+1) = w_temp(:,end);
 end
 
-fprintf('C at center (r=dr): %.4f\n', C_n_cell(1, end));
+fprintf('C at center (r=dr):  %.4f\n', C_n_cell(1, end));
 fprintf('C at cell surface:   %.4f\n', C_n_cell(end, end));
 fprintf('C at ECM inner edge: %.4f\n', C_n_ecm(1, end));
 fprintf('C at far field:      %.4f\n', C_n_ecm(end, end));
@@ -160,7 +165,7 @@ for j = 1:Nt_n+1
     colormap(jet);
     clim([0 1]);
     axis equal;
-    xlabel('x (um)'); ylabel('y (um)');
+    xlabel('x (\mum)'); ylabel('y (\mum)');
     title(sprintf('Nutrient Concentration at t = %.3f s', t_vec_plot(j)));
     hold on;
     plot(x_circle, y_circle, 'w-', 'LineWidth', 1);
