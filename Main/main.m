@@ -1,19 +1,18 @@
-clear all; close all;
+clearvars; close all;
 %% main.m — Two-region nutrient reaction-diffusion (cell + ECM), spherical
 %
-%   Solves nutrient transport across a cell embedded in ECM, as two coupled
-%   1D radial regions sharing a Fick's-law flux interface at r = R_cell:
-%
-%       Cell:  r = 0 .. R_cell     consumes nutrient (k < 0), center at r = 0
-%       ECM:   R_cell .. R_domain  inert medium (k = 0), far field fixed supply
+%   Solves nutrient and matrix transport across a cell embedded in ECM
+%       Cell:  r = 0 .. R_cell     
+%         - nutrient: consumes (k < 0)
+%         - matrix: produces (k > 0)
+%       ECM:   R_cell .. R_domain  
+%         - nutrient: inert medium (k = 0), far field fixed supply
 %
 %   Structure:
 %     - grid & parameters       (per region: D, k, P)
 %     - initial / boundary conditions
 %     - time loop: interface -> cell solve -> ECM solve
 %     - plots: cell surface, ECM surface, circular cross-section
-%
-%   Calls:  interface_cell_ecm.m,  crank_nicholson_spherical.m
 %
 %% __ Define Domains __ 
 % __ Global __
@@ -32,20 +31,20 @@ r_ecm_grid = linspace(R_cell, R_domain, Nr_ecm+1);  % ECM radial grid (um)
 
 %% __ Parameters __ 
 % __ Cell region parameters __ 
-D_n_cell = 200;     % diffusion coeff inside cell (um^2/s)
-k_n_cell = -2;      % reaction rate (1/s) (-) for consumption
-P_n_cell = 0;       % source term (uM/s) - no source here
-D_m_cell = 50;      % matrix diffusivity in cell (um^2/s) - slower than nutrient
-k_m_cell = 0;       % no loss inside cell
-P_m_cell = 0.05;    % constant production rate (uM/s)  [placeholder value]
+D_n_cell = 200;     % nutrient diffusion coeff inside cell (um^2/s)
+k_n_cell = -5;      % nutrient reaction rate (1/s) (consumption)
+P_n_cell = 0;       % nutrient source term (uM/s) 
+D_m_cell = 50;      % matrix diffusivity in cell (um^2/s)
+k_m_cell = 0;       % matrix reaction rate (1/s)
+P_m_cell = 0.1;    % matrix source term (uM/s)
 
 % __ ECM region parameters __ 
-D_n_ecm = 2200;     % diffusion coeff in ECM (um^2/s)
-k_n_ecm = 0;        % no reaction in ECM
-P_n_ecm = 0;        % source term (uM/s) - no source here
-D_m_ecm  = 100;     % matrix diffusivity in ECM
-k_m_ecm  = -0.1;    % crosslink loss (1/s), (-) = removal  [placeholder value]
-P_m_ecm  = 0;       % no production in ECM
+D_n_ecm = 2200;     % nutrient diffusion coeff in ECM (um^2/s)
+k_n_ecm = 0;        % nutrient reaction rate (1/s)
+P_n_ecm = 0;        % nutrient source term (uM/s) 
+D_m_ecm  = 300;     % matrix diffusivity in ECM (um^2/s)
+k_m_ecm  = -0.05;   % matrix reaction rate (1/s) (consumption due to crosslinking unbound->bound)
+P_m_ecm  = 0;       % matrix source term (uM/s)
 
 % __ General parameters __
 t_start_n = 0;          % start time (s)
@@ -57,8 +56,8 @@ plot_every_n = max(1, round(Nt_n / 50));
 
 %% __ IC & BC __ 
 
-c0_n = 1;               % nutrient initial concentration (uM), uniform
-c0_m = 0;               % matrix initial concentration (uM), uniform
+c0_n = 1;       % nutrient initial concentration (uM), uniform
+c0_m = 0;       % matrix initial concentration (uM), uniform
 
 % __ IC/BC cell __
 IC_n_cell   = @(r) c0_n * ones(size(r));   % uniform IC
@@ -144,9 +143,6 @@ fprintf('sigma cell = %f\n', sigma_n_cell);
 fprintf('sigma ECM  = %f\n', sigma_n_ecm);
 fprintf('rho cell   = %f\n', rho_n_cell);
 
-% __ Nutrient Plots __
-t_vec_plot = linspace(t_start_n, t_end_n, Nt_n+1);
-
 t_vec_plot = linspace(t_start_n, t_end_n, Nt_n+1);
 
 % nutrient: scale 0..max nutrient value
@@ -168,3 +164,5 @@ animate_cross_section(5, C_n_cell, C_n_ecm, r_cell_grid, r_ecm_grid, ...
     R_cell, t_vec_plot, dt_n, plot_every_n, 'Nutrient', cmax_n);
 animate_cross_section(6, C_m_cell, C_m_ecm, r_cell_grid, r_ecm_grid, ...
     R_cell, t_vec_plot, dt_n, plot_every_n, 'Matrix', cmax_m);
+plot_snapshot_grid(7, C_n_cell, C_n_ecm, r_cell_grid, r_ecm_grid, R_cell, t_vec_plot, [], 'Nutrient', cmax_n);
+plot_snapshot_grid(8, C_m_cell, C_m_ecm, r_cell_grid, r_ecm_grid, R_cell, t_vec_plot, [], 'Matrix',   cmax_m);
