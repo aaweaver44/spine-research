@@ -1,5 +1,5 @@
 function animate_cross_section(fignum, C_cell, C_ecm, r_cell_grid, r_ecm_grid, ...
-                               R_cell, t_vec, dt, plot_every, species_name, cmax_val)
+                               R_cell, t_vec, dt, plot_every, species_name, cmin_val, cmax_val)
  
     r_full = [0, r_cell_grid, r_ecm_grid(2:end)];
     theta  = linspace(0, 2*pi, 200);
@@ -18,7 +18,7 @@ function animate_cross_section(fignum, C_cell, C_ecm, r_cell_grid, r_ecm_grid, .
         C_2D   = repmat(C_full, length(theta), 1);
         pcolor(X, Y, C_2D);
         shading interp;  colorbar;  colormap(jet);
-        clim([0 cmax_val]);           % data-driven, per species
+        clim([cmin_val cmax_val]);           % data-driven, per species
         axis equal;
         xlabel('x (\mum)'); ylabel('y (\mum)');
         title(sprintf('%s Concentration at t = %.3f s', species_name, t_vec(j)));

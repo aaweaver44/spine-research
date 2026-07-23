@@ -1,5 +1,5 @@
 function plot_snapshot_grid(fignum, C_cell, C_ecm, r_cell_grid, r_ecm_grid, ...
-                            R_cell, t_vec, plot_every_unused, species_name, cmax_val)
+                            R_cell, t_vec, plot_every_unused, species_name, cmin_val, cmax_val)
     r_full = [0, r_cell_grid, r_ecm_grid(2:end)];
     N_theta = 200;
     theta = linspace(0, 2*pi, N_theta);
@@ -25,7 +25,7 @@ function plot_snapshot_grid(fignum, C_cell, C_ecm, r_cell_grid, r_ecm_grid, ...
         C_mesh = repmat(C_full, N_theta, 1);
         subplot(2, 3, s);
         pcolor(X, Y, C_mesh);
-        shading interp;  colormap(jet);  caxis([0 cmax_val]);
+        shading interp;  colormap(jet);  caxis([cmin_val cmax_val]);
         axis equal tight off;
         hold on;
         plot(R_cell*cos(theta), R_cell*sin(theta), 'w-', 'LineWidth', 1.5);
