@@ -13,9 +13,9 @@ clearvars; close all;
 
 %% __ Define Domains __ 
 % __ Global __
-R_cell = 20;            % cell radius (um)
-R_domain = 70;          % domain radius (um)
-dr = 1.6;               % spatial step size (um)
+R_cell = 20;       % cell radius (um)
+R_domain = 70;     % domain radius (um)
+dr = 1.6;          % spatial step size (um)
 
 % __ Cell Domain: r_start to R_cell __
 r_start = 0;  
@@ -23,45 +23,44 @@ Nr_cell = round(R_cell/dr);       % number of spatial steps in cell
 r_cell_grid = linspace(r_start, R_cell, Nr_cell+1);  % cell radial grid (um)
 
 % __ ECM domain: R_cell to R_domain __
-Nr_ecm   = round((R_domain-R_cell)/dr); % number of steps in ECM
+Nr_ecm = round((R_domain-R_cell)/dr);   % number of steps in ECM
 r_ecm_grid = linspace(R_cell, R_domain, Nr_ecm+1);  % ECM radial grid (um)
 
 %% __ Parameters __ 
 % __ Cell region parameters __ 
-k_N_cell = -0.2;       % nutrient reaction rate (1/s) (consumption)
-P_N_cell = 0;        % nutrient source term (uM/s) 
+k_N_cell  = -0.2;    % nutrient reaction rate (1/s) (consumption)
+P_N_cell  = 0;       % nutrient source term (uM/s) 
 k_UM_cell = 0;       % unlinked matrix reaction rate (1/s)
 P_UM_cell = 0.1;     % unlinked matrix source term (uM/s)
 
 % __ ECM region parameters __ 
-k_N_ecm = 0;        % nutrient reaction rate (1/s)
-P_N_ecm = 0;        % nutrient source term (uM/s) 
-k_UM_ecm  = -0.048; % unlinked matrix reaction rate (1/s) (consumption due to crosslinking unlinked->linked) (abs(k_m_ecm)=crosslinking rate)
-P_UM_ecm  = 0;      % unlinked matrix source term (uM/s)
+k_N_ecm  = 0;        % nutrient reaction rate (1/s)
+P_N_ecm  = 0;        % nutrient source term (uM/s) 
+k_UM_ecm = -0.048;   % unlinked matrix reaction rate (1/s) (consumption due to crosslinking unlinked->linked) (abs(k_m_ecm)=crosslinking rate)
+P_UM_ecm = 0;        % unlinked matrix source term (uM/s)
 
 % __ IC & BC __ 
+C0_N_cell   = 1;     % initial nutrient concentration (uM), uniform
+C0_UM_cell  = 0;     % initial matrix concentration (uM), uniform
+phi0_S_cell = 0.2;   % initial solid volume fraction
+D0_N_cell   = 200;   % initial nutrient diffusivity (um^2/s)
+D0_UM_cell  = 1;     % initial unlinked matrix diffusivity (um^2/s)
 
-C0_N_cell = 1;        % initial nutrient concentration (uM), uniform
-C0_UM_cell = 0;       % initial matrix concentration (uM), uniform
-phi0_S_cell = 0.2;    % initial solid volume fraction
-D0_N_cell  = 200;      % initial nutrient diffusivity (um^2/s)
-D0_UM_cell  = 1;      % initial unlinked matrix diffusivity (um^2/s)
-
-C0_N_ecm = 1;        % initial nutrient concentration (uM), uniform
-C0_UM_ecm = 0;       % initial matrix concentration (uM), uniform
+C0_N_ecm   = 1;      % initial nutrient concentration (uM), uniform
+C0_UM_ecm  = 0;      % initial matrix concentration (uM), uniform
 phi0_S_ecm = 0.2;    % initial solid volume fraction
-D0_N_ecm  = 2200;      % initial nutrient diffusivity (um^2/s)
+D0_N_ecm   = 2200;   % initial nutrient diffusivity (um^2/s)
 D0_UM_ecm  = 1;      % initial unlinked matrix diffusivity (um^2/s)
 
 % __ IC/BC cell __
-IC_N_cell   = @(r) C0_N_cell * ones(size(r));   % uniform IC
+IC_N_cell  = @(r) C0_N_cell * ones(size(r));   % uniform IC
 IC_UM_cell = @(r) C0_UM_cell * ones(size(r));
 IC_UM_ecm  = @(r) C0_UM_ecm * ones(size(r));
 
 % __ IC/BC ECM
-IC_N_ecm    = @(r) C0_N_ecm * ones(size(r));     % uniform IC
-C_N_B  = @(t) C0_N_ecm * ones(size(t));     % far field Boundary: infinite supply
-C_UM_B = @(t) C0_UM_ecm * ones(size(t));    % far field Boundary: no matrix supply
+IC_N_ecm = @(r) C0_N_ecm * ones(size(r));   % uniform IC
+C_N_B    = @(t) C0_N_ecm * ones(size(t));   % far field Boundary: infinite supply
+C_UM_B   = @(t) C0_UM_ecm * ones(size(t));  % far field Boundary: no matrix supply
 
 % __ General parameters __
 t_start = 0;                  % start time (s)
@@ -71,13 +70,13 @@ Nt = round(t_end/dt);         % number of time steps
 plot_every_n = max(1, round(Nt / 50));
 
 % __ Define Concentration state arrays __
-C_N_cell = zeros(Nr_cell+1, Nt+1);        % cell region solution
-C_N_ecm  = zeros(Nr_ecm+1,  Nt+1);        % ECM region solution
-C_N_cell(:,1) = IC_N_cell(r_cell_grid)';    % attach ICs
-C_N_ecm(:,1)  = IC_N_ecm(r_ecm_grid)';      % attach ICs
-C_UM_cell = zeros(Nr_cell+1, Nt+1);  
-C_UM_ecm  = zeros(Nr_ecm+1,  Nt+1);  
+C_N_cell       = zeros(Nr_cell+1, Nt+1);     % cell region solution
+C_UM_cell      = zeros(Nr_cell+1, Nt+1);  
+C_N_ecm        = zeros(Nr_ecm+1,  Nt+1);     % ECM region solution
+C_UM_ecm       = zeros(Nr_ecm+1,  Nt+1);  
+C_N_cell(:,1)  = IC_N_cell(r_cell_grid)';    % attach ICs
 C_UM_cell(:,1) = IC_UM_cell(r_cell_grid)';
+C_N_ecm(:,1)   = IC_N_ecm(r_ecm_grid)';     
 C_UM_ecm(:,1)  = IC_UM_ecm(r_ecm_grid)';
 
 % __ Define Volume Fraction state arrays __
@@ -88,6 +87,7 @@ D_N_cell = D0_N_cell;
 D_UM_cell = D0_UM_cell;      
 D_N_ecm = D0_N_ecm;     
 D_UM_ecm  = D0_UM_ecm;   
+
 %% __ Time loop  __
 for j = 1:Nt
     
@@ -171,7 +171,7 @@ fields(3) = struct('name','C_UM_cell', 'C',C_UM_cell);
 fields(4) = struct('name','C_UM_ecm',  'C',C_UM_ecm);
 print_diagnostics(dr, dt, Nt, t_end, specs, fields);
 
-t_vec_plot = linspace(t_start, t_end, Nt+1);
+t_vec_plot = t_start + (0:Nt)*dt;
 
 % nutrient: scale 0..max nutrient value
 cmin_N = min([C_N_cell(:); C_N_ecm(:)]);
@@ -192,5 +192,5 @@ plot_region_surface(4, r_ecm_grid,  t_vec_plot, C_UM_ecm,  R_cell, 'ECM',  'Matr
 %    R_cell, t_vec_plot, dt, plot_every_n, 'Nutrient', cmin_N, cmax_N);
 %animate_cross_section(6, C_UM_cell, C_UM_ecm, r_cell_grid, r_ecm_grid, ...
 %    R_cell, t_vec_plot, dt, plot_every_n, 'Matrix', cmin_UM, cmax_UM);
-plot_snapshot_grid(7, C_N_cell, C_N_ecm, r_cell_grid, r_ecm_grid, R_cell, t_vec_plot, [], 'Nutrient', cmin_N, cmax_N);
-plot_snapshot_grid(8, C_UM_cell, C_UM_ecm, r_cell_grid, r_ecm_grid, R_cell, t_vec_plot, [], 'Matrix', cmin_UM, cmax_UM);
+%plot_snapshot_grid(7, C_N_cell, C_N_ecm, r_cell_grid, r_ecm_grid, R_cell, t_vec_plot, [], 'Nutrient', cmin_N, cmax_N);
+%plot_snapshot_grid(8, C_UM_cell, C_UM_ecm, r_cell_grid, r_ecm_grid, R_cell, t_vec_plot, [], 'Matrix', cmin_UM, cmax_UM);

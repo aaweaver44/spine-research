@@ -8,6 +8,5 @@ function plot_region_surface(fignum, r_grid, t_vec, C, R_cell, region_name, spec
     view(45, 25);
     colorbar;
     hold on;
-    xline(R_cell, 'r-', 'LineWidth', 2, 'Label', 'cell boundary');
     hold off;
 end
